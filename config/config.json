@@ -5,7 +5,8 @@
     "database": "auth_db",
     "host": "127.0.0.1",
     "dialect": "postgres",
-    "operatorsAliases": false
+    "operatorsAliases": false,
+    "logging": false
   },
   "test": {
     "username": "postgres",
@@ -13,7 +14,8 @@
     "database": "database_test",
     "host": "127.0.0.1",
     "dialect": "postgres",
-    "operatorsAliases": false
+    "operatorsAliases": false,
+    "logging": false
   },
   "production": {
     "username": "root",

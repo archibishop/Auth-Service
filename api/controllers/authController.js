@@ -2,6 +2,7 @@
 /* eslint-disable class-methods-use-this */
 import joi from 'joi';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import sendMail from '../helpers/sendEmail';
 import models from '../../models';
 
@@ -67,17 +68,73 @@ class AuthController {
     models.User.findOne({ where: { id } }).then((user) => {
       user.update({
         active: true,
-      }).then(() => {
-        res.status(200).send({
-          success: true,
-          message: 'The account has been activated. You can successfully login.',
-        });
+      }).then((item) => {
+        if (item) {
+          res.status(200).send({
+            success: true,
+            message: 'The account has been activated. You can successfully login.',
+          });
+        } else {
+          res.status(404).send({
+            success: false,
+            message: 'User does not exist.',
+          });
+        }
       });
     }).catch(() => {
-      res.status(404).send({
+      res.status(400).send({
         success: false,
-        message: 'User does not exist.',
+        message: 'An error occured',
       });
+    });
+  }
+
+  loginUser(req, res) {
+    const data = req.body;
+    const schema = joi.object().keys({
+      email: joi.string().email().required(),
+      password: joi.string().required(),
+    });
+    joi.validate(data, schema, (err, value) => {
+      const { email, password } = value;
+      if (err) {
+        res.status(400).json({
+          status: 'error',
+          message: `Invalid request data. (${err.details[0].path}) is required.`,
+        });
+      } else {
+        models.User.findOne({ where: { email } })
+          .then((user) => {
+            if (user) {
+              bcrypt.compare(password, user.password, (err, resp) => {
+                if (resp) {
+                  const token = jwt.sign({ user }, 'MySuperSecretPassPhrase', { algorithm: 'HS256' });
+                  res.status(200).send({
+                    success: true,
+                    message: 'You have been successfully logged in',
+                    token,
+                  });
+                } else {
+                  res.status(404).send({
+                    success: false,
+                    message: 'Wrong Password Entered',
+                  });
+                }
+              });
+            } else {
+              res.status(404).send({
+                success: false,
+                message: 'Wrong Email Entered',
+              });
+            }
+          })
+          .catch((error) => {
+            res.status(400).send({
+              success: false,
+              message: `An error occured ${error}`,
+            });
+          });
+      }
     });
   }
 }

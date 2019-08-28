@@ -62,3 +62,4 @@ typings/
 
 # vs code settings
 .vscode/
+private.pem
