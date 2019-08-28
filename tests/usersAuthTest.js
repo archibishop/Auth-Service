@@ -50,5 +50,20 @@ describe('users', () => {
           done();
         });
     });
+    // Login User
+    it('login user', (done) => {
+      chai.request(server)
+        .post('/api/v1/users/login')
+        .set('content-type', 'application/json')
+        .send({
+          email: 'testuser@gmail.com',
+          password: '1@dD1T39',
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          done();
+        });
+    });
   });
 });
