@@ -137,6 +137,66 @@ class AuthController {
       }
     });
   }
+
+  resetPassword(req, res) {
+    const data = req.body;
+    const schema = joi.object().keys({
+      id: joi.string().required(),
+      password: joi.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,10}$/).required(),
+      confirm_password: joi.string().required(),
+    });
+    joi.validate(data, schema, (err, value) => {
+      const { id, password, confirm_password } = value;
+      if (password !== confirm_password) {
+        res.status(400).send({
+          success: false,
+          message: 'confirm_password and passord should be the same',
+        });
+      } else {
+      // eslint-disable-next-line radix
+        models.User.findOne({ where: { id: parseInt(id) } }).then((user) => {
+          if (user) {
+            bcrypt.compare(password, user.password, (err, resp) => {
+              if (resp) {
+                res.status(400).send({
+                  success: false,
+                  message: 'Please enter a new passowrd from the previous one.',
+                });
+              } else {
+                bcrypt.hash(password, 10, (err, hash) => {
+                  user.update({
+                    password: hash,
+                  }).then((item) => {
+                    if (item) {
+                      res.status(200).send({
+                        success: true,
+                        message: 'Your password has been reset',
+                      });
+                    } else {
+                      res.status(400).send({
+                        success: false,
+                        message: 'Your password has not been reset',
+                      });
+                    }
+                  });
+                });
+              }
+            });
+          } else {
+            res.status(400).send({
+              success: false,
+              message: 'User does not exist',
+            });
+          }
+        }).catch(() => {
+          res.status(400).send({
+            success: false,
+            message: 'An error occured',
+          });
+        });
+      }
+    });
+  }
 }
 
 const authController = new AuthController();

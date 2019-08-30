@@ -12,7 +12,10 @@ router.post('/api/v1/users', AuthController.createUser);
 // Activate user account
 router.get('/api/v1/users/activate/:id', AuthController.activateAccount);
 
-// login user
+// Login user
 router.post('/api/v1/users/login', AuthController.loginUser);
+
+// Reset password
+router.post('/api/v1/users/reset-password', AuthController.resetPassword);
 
 export default router;
