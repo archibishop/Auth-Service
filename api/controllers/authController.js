@@ -4,14 +4,29 @@ import jwt from 'jsonwebtoken';
 import sendMail from '../helpers/sendEmail';
 import models from '../../models';
 import Dbhelper from '../helpers/dbHelper';
+import redisClient from '../helpers/redisClient';
 
 class AuthController {
   getUsers(req, res) {
-    models.User.findAll().then((users) => res.status(200).send({
-      success: true,
-      message: 'Users successfully retrieved',
-      users,
-    }));
+    // key to store results in Redis store
+    const usersRedisKey = 'user:photos';
+    let users;
+    redisClient.get(usersRedisKey, (err, usersList) => {
+      if (usersList) {
+        users = JSON.parse(usersList);
+      } else {
+        models.User.findAll().then((items) => {
+          // Save the  API response in Redis store
+          redisClient.setex(usersRedisKey, 3600, JSON.stringify(items));
+          users = items;
+        });
+      }
+      res.status(200).send({
+        success: true,
+        message: 'Users successfully retrieved',
+        users,
+      });
+    });
   }
 
   async createUser(req, res) {
