@@ -5,7 +5,7 @@ sequelize db:create
 echo 'Run Migrations'
 sequelize db:migrate
 echo 'Run Tests'
-node_modules/.bin/_mocha --require babel-register tests/*.js --exit
+node_modules/.bin/_mocha --compilers js:babel-core/register --require babel-polyfill tests/*.js  --exit
 echo 'Drop Database'
 sequelize db:drop
 export NODE_ENV=development
