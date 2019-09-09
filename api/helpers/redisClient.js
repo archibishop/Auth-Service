@@ -5,6 +5,7 @@ const redisClient = redis.createClient(6379);
 
 // echo redis errors to the console
 redisClient.on('error', (err) => {
+  // eslint-disable-next-line no-console
   console.log(`Error ${err}`);
 });
 

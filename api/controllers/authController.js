@@ -5,6 +5,9 @@ import sendMail from '../helpers/sendEmail';
 import models from '../../models';
 import Dbhelper from '../helpers/dbHelper';
 import redisClient from '../helpers/redisClient';
+import config from '../helpers/config.json';
+
+const tokenList = {};
 
 class AuthController {
   getUsers(req, res) {
@@ -82,12 +85,16 @@ class AuthController {
 
   loginUser(req, res) {
     const { user } = req.body;
-    const token = jwt.sign({ user }, 'MySuperSecretPassPhrase', { algorithm: 'HS256' });
-    res.status(200).send({
+    const token = jwt.sign({ user }, config.secret, { expiresIn: config.tokenLife });
+    const refreshToken = jwt.sign({ user }, config.secret, { expiresIn: config.refreshTokenLife });
+    const response = {
       success: true,
       message: 'You have been successfully logged in',
       token,
-    });
+      refreshToken,
+    };
+    tokenList[refreshToken] = response;
+    res.status(200).send(response);
   }
 
   async resetPassword(req, res) {
@@ -110,6 +117,36 @@ class AuthController {
       res.status(500).send({
         success,
         message,
+      });
+    }
+  }
+
+  secureRoutes(req, res) {
+    res.status(200).send({
+      success: true,
+      message: 'Your token has been accepted and you are authenticated.',
+    });
+  }
+
+  refreshToken(req, res) {
+    const { email, name, refreshToken } = req.body;
+    // if refresh token exists
+    if ((refreshToken) && (refreshToken in tokenList)) {
+      const user = {
+        email,
+        name,
+      };
+      const token = jwt.sign(user, config.secret, { expiresIn: config.tokenLife });
+      const response = {
+        token,
+      };
+      // update the token in the list
+      tokenList[refreshToken].token = token;
+      res.status(200).json(response);
+    } else {
+      res.status(200).send({
+        success: false,
+        message: 'Invalid Request.',
       });
     }
   }
