@@ -1,6 +1,7 @@
 import express from 'express';
 import AuthController from '../controllers/authController';
 import ValidationMiddleware from '../middleware/validationMiddleware';
+import tokenValidator from '../middleware/tokenValidator';
 
 const router = express.Router();
 
@@ -18,5 +19,11 @@ router.post('/api/v1/users/login', ValidationMiddleware, AuthController.loginUse
 
 // Reset password
 router.post('/api/v1/users/reset-password', ValidationMiddleware, AuthController.resetPassword);
+
+// Test Secure route
+router.get('/api/v1/users/secure', tokenValidator, AuthController.secureRoutes);
+
+// Refresh token
+router.post('/api/v1/users/refresh-token', AuthController.refreshToken);
 
 export default router;
