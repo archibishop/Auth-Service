@@ -17,6 +17,15 @@
     "operatorsAliases": false,
     "logging": false
   },
+  "docker": {
+    "username": "postgres",
+    "password": "postgres",
+    "database": "auth_db",
+    "host": "db",
+    "dialect": "postgres",
+    "operatorsAliases": false,
+    "logging": false
+  },
   "production": {
     "username": "root",
     "password": null,

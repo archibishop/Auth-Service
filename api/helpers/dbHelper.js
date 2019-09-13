@@ -7,7 +7,7 @@ class DbHelper {
       const user = await models.User.create(newUser);
       return { success: true, user, message: 'User created successfully' };
     } catch (err) {
-      return { success: false, message: 'Username/email already exists' };
+      return { success: false, message: 'Error occurred.'};
     }
   }
 

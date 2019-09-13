@@ -1,7 +1,7 @@
 import redis from 'redis';
 
 // create and connect redis client to local instance.
-const redisClient = redis.createClient(6379);
+const redisClient = redis.createClient(process.env.REDIS_URL);
 
 // echo redis errors to the console
 redisClient.on('error', (err) => {
