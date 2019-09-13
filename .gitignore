@@ -65,3 +65,5 @@ typings/
 private.pem
 
 .DS_Store
+
+dump.rdb

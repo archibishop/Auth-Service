@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+  web:
+    build: .
+    container_name: auth-service
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "3070:3000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      APP_SETTINGS: "production"
+      DATABASE_URL: "postgres://postgres:postgres@db/auth_db"
+      REDIS_URL: redis://cache
+      NODE_ENV: "docker"
+  redis:
+    image: 'redis:3.2.0'
+    container_name: cache
+    expose:
+      - 6379
