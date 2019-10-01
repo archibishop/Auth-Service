@@ -9,7 +9,8 @@ const tokenValidator = (req, res, next) => {
     // verifies secret and checks exp
     jwt.verify(token, config.secret, (err, decoded) => {
       if (err) {
-        res.status(401).json({ error: true, message: 'Unauthorized access.' });
+        const { message } = err;
+        res.status(401).json({ error: true, message });
       } else {
         req.decoded = decoded;
         next();

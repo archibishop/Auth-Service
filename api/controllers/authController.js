@@ -7,7 +7,9 @@ import redisClient from '../helpers/redisClient';
 import config from '../helpers/config.json';
 import repository from '../repository/repository';
 
-const tokenList = {};
+// TODO ::
+// Change the storage of the tokens to redis
+const tokenList = [];
 
 class AuthController {
   getUsers(req, res) {
@@ -103,7 +105,7 @@ class AuthController {
       token,
       refreshToken,
     };
-    tokenList[refreshToken] = response;
+    tokenList.push(refreshToken);
     res.status(200).send(response);
   }
 
@@ -145,23 +147,29 @@ class AuthController {
 
   refreshToken(req, res) {
     const { email, name, refreshToken } = req.body;
-    // if refresh token exists
-    if ((refreshToken) && (refreshToken in tokenList)) {
-      const user = {
-        email,
-        name,
-      };
-      const token = jwt.sign(user, config.secret, { expiresIn: config.tokenLife });
-      const response = {
-        token,
-      };
-      // update the token in the list
-      tokenList[refreshToken].token = token;
-      res.status(200).json(response);
+    if ((refreshToken) && (tokenList.includes(refreshToken))) {
+      jwt.verify(refreshToken, config.secret, (err, decoded) => {
+        if (err) {
+          // TODO ::
+          // Remove the expired token from storage..
+          res.status(400).json({ error: true, message: "Refesh Token has Expired." });
+        } else {
+          const { email, name } = decoded.user
+          const user = {
+            email,
+            name
+          }
+          const token = jwt.sign(user, config.secret, { expiresIn: config.tokenLife });
+          const response = {
+            token,
+          };
+          res.status(200).json(response);
+        }
+      });
     } else {
-      res.status(200).send({
+      res.status(400).send({
         success: false,
-        message: 'Invalid Request.',
+        message: 'Invalid Refresh Token.',
       });
     }
   }
