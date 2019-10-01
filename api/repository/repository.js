@@ -60,7 +60,8 @@ const repository = () => {
         findUserByEmailRepo,
         findUserByIdRepo,
         createUserRepo,
-        updateUserPasswordRepo
+        updateUserPasswordRepo,
+        updateUserActiveRepo
     });
 }
 
