@@ -3,9 +3,9 @@
 import jwt from 'jsonwebtoken';
 import sendMail from '../helpers/sendEmail';
 import models from '../../models';
-import Dbhelper from '../helpers/dbHelper';
 import redisClient from '../helpers/redisClient';
 import config from '../helpers/config.json';
+import repository from '../repository/repository';
 
 const tokenList = {};
 
@@ -40,7 +40,12 @@ class AuthController {
     const new_user = {
       email, user_name, first_name, last_name, password, active: false,
     };
-    const user_new = await Dbhelper.createUser(new_user);
+    let user_new;
+    try {
+      user_new = await repository.createUserRepo(new_user);
+    } catch (err) {
+      user_new = err
+    }
     const {
       id, success, user, message,
     } = user_new;
@@ -61,7 +66,12 @@ class AuthController {
 
   async activateAccount(req, res) {
     const { id } = req.params;
-    const updateRes = await Dbhelper.updateUserActive(id);
+    let updateRes;
+    try {
+      updateRes = await Dbhelper.updateUserActive(id);
+    } catch (err) {
+      updateRes = err;
+    }
     const { update, success, message } = updateRes;
     if (success) {
       if (update[0] === 0) {
@@ -99,13 +109,18 @@ class AuthController {
 
   async resetPassword(req, res) {
     const { id, password } = req.body;
-    const updateResponse = await Dbhelper.updateUserPassword(id, password);
+    let updateResponse;
+    try {
+      updateResponse = await repository.updateUserPasswordRepo(id, password);
+    } catch (err) {
+      updateResponse = err;
+    }
     const { update, success, message } = updateResponse;
     if (success) {
       if (update[0] === 0) {
         res.status(404).send({
           success: false,
-          message: 'User Doesnt exist.',
+          message: 'Password reset failed.',
         });
       } else {
         res.status(200).send({

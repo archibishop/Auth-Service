@@ -1,6 +1,6 @@
 import joi from 'joi';
 import bcrypt from 'bcrypt';
-import Dbhelper from '../helpers/dbHelper';
+import repository from '../repository/repository';
 
 const hashPassword = async (value) => {
   const { password } = value;
@@ -60,7 +60,12 @@ const validationMiddleWare = (req, res, next) => {
           message: `Invalid request data. (${err.details[0].path}) field is invalid.`,
         });
       } else {
-        const userFound = await Dbhelper.findUserByEmail(value.email);
+        let userFound;
+        try {
+          userFound = await repository.findUserByEmailRepo(value.email);
+        } catch (err) {
+          userFound = err;
+        }
         const { user, success, message } = userFound;
         if (success) {
           const result = await comparePassword(value.password, user.password);
@@ -91,13 +96,18 @@ const validationMiddleWare = (req, res, next) => {
     joi.validate(data, schema, async (err, value) => {
       const { id, password } = value;
       const confirmPassword = value.confirm_password;
+      let userFound;
       if (password !== confirmPassword) {
         res.status(400).send({
           success: false,
-          message: 'confirm_password and passord should be the same',
+          message: 'confirm_password and password should be the same',
         });
       } else {
-        const userFound = await Dbhelper.findUserById(id);
+        try {
+          userFound = await repository.findUserByIdRepo(id);
+        } catch (err) {
+          userFound = err
+        }
         const { user, success, message } = userFound;
         if (success) {
           const result = await comparePassword(password, user.password);
