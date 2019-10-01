@@ -68,7 +68,7 @@ class AuthController {
     const { id } = req.params;
     let updateRes;
     try {
-      updateRes = await Dbhelper.updateUserActive(id);
+      updateRes = await repository.updateUserActiveRepo(id)
     } catch (err) {
       updateRes = err;
     }
