@@ -13,7 +13,7 @@ RUN npm install
 # install sequelize
 RUN npm install -g sequelize
 
-# copy oter files as well
+# copy other files as well
 COPY ./ .
 
 #expose the port
