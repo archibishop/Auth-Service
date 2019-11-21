@@ -67,3 +67,6 @@ private.pem
 .DS_Store
 
 dump.rdb
+
+# aws ssh key
+mypair.pem
